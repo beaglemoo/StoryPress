@@ -1,0 +1,52 @@
+name: Bug report
+description: Report a reproducible StoryPress problem
+title: "Bug: "
+body:
+  - type: markdown
+    attributes:
+      value: "Please remove personal data, API keys, private endpoints, and book text from reports and screenshots."
+  - type: input
+    id: version
+    attributes:
+      label: StoryPress version
+      placeholder: "For example, 0.1.0"
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+    validations:
+      required: true
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Provider type involved
+      options:
+        - Local model service
+        - OpenRouter
+        - ComfyUI
+        - No provider
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Do not include private story text, credentials, or private service URLs.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened
+      description: Include the visible error message if there is one. Redact private details.
+    validations:
+      required: true
