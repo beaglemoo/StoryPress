@@ -33,7 +33,12 @@ xcodebuild_args=(
 )
 
 if [[ -n "${STORYPRESS_SIGNING_IDENTITY:-}" ]]; then
-    xcodebuild_args+=("CODE_SIGNING_ALLOWED=YES" "CODE_SIGN_IDENTITY=$STORYPRESS_SIGNING_IDENTITY")
+    xcodebuild_args+=(
+        "CODE_SIGNING_ALLOWED=YES"
+        "CODE_SIGN_IDENTITY=$STORYPRESS_SIGNING_IDENTITY"
+        "CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO"
+        "OTHER_CODE_SIGN_FLAGS=--timestamp"
+    )
     if [[ -n "${STORYPRESS_TEAM_ID:-}" ]]; then
         xcodebuild_args+=("DEVELOPMENT_TEAM=$STORYPRESS_TEAM_ID")
     fi
@@ -60,6 +65,25 @@ rm -f "$archive_path"
 
 if [[ -n "${STORYPRESS_SIGNING_IDENTITY:-}" ]]; then
     codesign --verify --deep --strict --verbose=2 "$packaged_app"
+
+    if ! get_task_allow="$(
+        codesign -d --entitlements :- "$packaged_app" 2>/dev/null |
+            /usr/bin/python3 -c 'import plistlib, sys; value = plistlib.loads(sys.stdin.buffer.read()).get("com.apple.security.get-task-allow"); print("" if value is None else str(value).lower() if isinstance(value, bool) else "unexpected")'
+    )"; then
+        printf '%s\n' "Could not read the signed app entitlements." >&2
+        exit 1
+    fi
+    if [[ -n "$get_task_allow" && "$get_task_allow" != "false" ]]; then
+        printf 'The signed app has unexpected com.apple.security.get-task-allow=%s.\n' "$get_task_allow" >&2
+        exit 1
+    fi
+
+    signature_details="$(codesign -dv --verbose=4 "$packaged_app" 2>&1)"
+    timestamp="$(printf '%s\n' "$signature_details" | sed -n 's/^Timestamp=//p' | head -n 1)"
+    if [[ -z "$timestamp" || "$timestamp" == "none" ]]; then
+        printf '%s\n' "The signed app has no secure code-signing timestamp." >&2
+        exit 1
+    fi
 fi
 
 if [[ -n "${STORYPRESS_NOTARY_PROFILE:-}" ]]; then
@@ -68,10 +92,22 @@ if [[ -n "${STORYPRESS_NOTARY_PROFILE:-}" ]]; then
         exit 1
     fi
     /usr/bin/ditto -c -k --keepParent "$packaged_app" "$archive_path"
-    xcrun notarytool submit "$archive_path" --keychain-profile "$STORYPRESS_NOTARY_PROFILE" --wait
+    notary_receipt="$repo_root/build/$app_name-notary-submission.json"
+    mkdir -p "$(dirname "$notary_receipt")"
+    if ! xcrun notarytool submit "$archive_path" --keychain-profile "$STORYPRESS_NOTARY_PROFILE" --wait --output-format json >"$notary_receipt"; then
+        rm -f "$archive_path"
+        printf 'Notarization submission failed. Review %s for the submission receipt.\n' "build/$app_name-notary-submission.json" >&2
+        exit 1
+    fi
+    notary_status="$(/usr/bin/plutil -extract status raw -o - "$notary_receipt" 2>/dev/null || true)"
+    if [[ "$notary_status" != "Accepted" ]]; then
+        rm -f "$archive_path"
+        printf 'Notarization status was %s, not Accepted. Review %s and the notary log before retrying.\n' "${notary_status:-unknown}" "build/$app_name-notary-submission.json" >&2
+        exit 1
+    fi
+    rm -f "$archive_path"
     xcrun stapler staple "$packaged_app"
     xcrun stapler validate "$packaged_app"
-    rm -f "$archive_path"
 fi
 
 /usr/bin/ditto -c -k --keepParent "$packaged_app" "$archive_path"
