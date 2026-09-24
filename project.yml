@@ -1,0 +1,77 @@
+name: StoryPress
+options:
+  bundleIdPrefix: com.beaglemoo
+  deploymentTarget:
+    macOS: "26.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    CODE_SIGN_STYLE: Manual
+    CODE_SIGN_IDENTITY: "-"
+    MACOSX_DEPLOYMENT_TARGET: "26.0"
+    ENABLE_HARDENED_RUNTIME: YES
+    ENABLE_DEBUG_DYLIB: NO
+    GENERATE_INFOPLIST_FILE: YES
+targets:
+  StoryPress:
+    type: application
+    platform: macOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: StoryPress
+        excludes:
+          - "Info.plist"
+          - "StoryPress.entitlements"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.beaglemoo.StoryPress
+        PRODUCT_NAME: StoryPress
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        SWIFT_STRICT_CONCURRENCY: complete
+    info:
+      path: StoryPress/Info.plist
+      properties:
+        CFBundleDisplayName: StoryPress
+        LSApplicationCategoryType: public.app-category.education
+        NSHumanReadableCopyright: "Copyright 2026 StoryPress contributors"
+        LSMinimumSystemVersion: "26.0"
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+        NSLocalNetworkUsageDescription: "StoryPress connects to local model and ComfyUI services that you choose in Settings."
+    entitlements:
+      path: StoryPress/StoryPress.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.network.client: true
+        com.apple.security.files.user-selected.read-write: true
+  StoryPressTests:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: StoryPressTests
+    dependencies:
+      - target: StoryPress
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.beaglemoo.StoryPressTests
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "-"
+schemes:
+  StoryPress:
+    build:
+      targets:
+        StoryPress: all
+        StoryPressTests: [test]
+    test:
+      targets:
+        - StoryPressTests
+    run:
+      config: Debug
+    archive:
+      config: Release

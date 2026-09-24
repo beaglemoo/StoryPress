@@ -1,0 +1,73 @@
+# Xcode and XcodeGen
+*.xcodeproj/
+*.xcworkspace/
+DerivedData/
+build/
+dist/
+.build/
+.swiftpm/
+
+# Local runtime output and generated books
+/Books/
+/Library/
+/StoryPress Library/
+/storypress-library/
+*.storypress
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.gif
+*.bmp
+*.tif
+*.tiff
+*.heic
+*.avif
+# Curated artwork and synthetic fixtures are part of the source tree.
+!StoryPress/Assets.xcassets/**
+!docs/assets/**
+!StoryPressTests/Fixtures/**
+*.log
+/logs/
+/model-cache/
+/models/
+/weights/
+/checkpoints/
+/output/
+/outputs/
+/tmp/
+/ComfyUI/
+/comfyui/
+/.runtime/
+/.venv/
+/venv/
+*.safetensors
+*.gguf
+*.mlx
+*.snapshot
+
+# Local credentials and configuration
+.env
+.env.*
+!.env.example
+*.local
+local-settings.json
+signing-config.json
+*.mobileprovision
+*.p12
+*.cer
+*.key
+*.pem
+*.p8
+
+# macOS and editor noise
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.idea/
+.vscode/
+*.xcuserstate
+xcuserdata/
