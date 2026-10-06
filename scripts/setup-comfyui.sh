@@ -2,7 +2,7 @@
 set -euo pipefail
 
 readonly COMFYUI_REPOSITORY="https://github.com/Comfy-Org/ComfyUI.git"
-readonly COMFYUI_COMMIT="93810483a4739a1588236919a3128d3070244146"
+readonly COMFYUI_COMMIT="b0b743566f65daafc423b4fea8a2fbda94b3384a"
 readonly MODEL_REPOSITORY="Comfy-Org/Qwen-Image-2.1"
 readonly MODEL_REVISION="9a44dbdb47cefd046be9c0a13476192f34c8db8e"
 readonly TORCH_MANIFEST_COMMIT="444a502dcee92e651b6ba2311c781ad66a924848"
